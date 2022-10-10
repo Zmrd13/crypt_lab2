@@ -9,19 +9,19 @@ using namespace std;
 
 class CrFile{
 private:
-    vector<lli> bytes;
+    vector<char> bytes;
 public:
     CrFile(string name="foo",string path=""){
         ifstream input(name, std::ios::binary);
 
-        bytes=vector<lli>(
+        bytes=vector<char>(
                 (istreambuf_iterator<char>(input)),
                 (istreambuf_iterator<char>()));
 
         input.close();
 
     }
-    CrFile(vector<lli> in){
+    CrFile(vector<char> in){
         bytes=std::move(in);
     }
     void show(){
@@ -29,7 +29,7 @@ public:
             cout<<i;
         }
     }
-    vector<lli>getVector(){
+    vector<char>getVector(){
         return bytes;
     }
     int outToFile(string name="foo"){
@@ -46,13 +46,7 @@ lli genPrime(lli min=4,lli max=100){
     }
     return temp;
 }
-vector<lli> shamCypher(vector<lli>file,lli pow,lli p){
-    vector<lli> temp=file;
-    for(auto &i:temp){
-        i=modPow(i,pow,p);
-    }
-    return temp;
-}
+
 int main(){
     lli Ca=0,Da=0,p;
     lli Cb=0,Db=0;
@@ -70,31 +64,11 @@ int main(){
     }
     cout<<"\n"<<Ca<<"\n"<<Da<<"\n"<<(Ca*Da)%(p-1);
     cout<<"\n"<<Cb<<"\n"<<Db<<"\n"<<(Cb*Db)%(p-1);
-    CrFile srcFile("test.txt");
-vector<lli> temp= shamCypher(srcFile.getVector(),Ca,p);
-//    for(auto &i:temp){
+    CrFile srcFile("test.jpg");
+
+//    for(auto &i:srcFile.getVector()){
 //        i= modPow(i,Ca,p);
 //    }
-    srcFile.outToFile("test1.txt");
-    CrFile srcFile1(temp);
-    srcFile1.outToFile("test2.txt");
-    temp= shamCypher(srcFile1.getVector(),Cb,p);
-//    for(auto &i:temp){
-//        i= modPow(i,Cb,p);
-//    }
-    CrFile srcFile2(temp);
-    srcFile2.outToFile("test3.txt");
-    temp= shamCypher(srcFile2.getVector(),Da,p);
-//    for(auto &i:temp){
-//        i= modPow(i,Da,p);
-//    }
-    CrFile srcFile3(temp);
-    srcFile3.outToFile("test4.txt");
-    temp= shamCypher(srcFile3.getVector(),Db,p);
-//    for(auto &i:temp){
-//        i= modPow(i,Db,p);
-//    }
-    CrFile srcFile4(temp);
-    srcFile4.outToFile("test5.txt");
+    srcFile.outToFile("test1.jpg");
     return 0;
 }
