@@ -9,19 +9,19 @@ using namespace std;
 
 class CrFile{
 private:
-    vector<char> bytes;
+    vector<lli> bytes;
 public:
     CrFile(string name="foo",string path=""){
         ifstream input(name, std::ios::binary);
 
-        bytes=vector<char>(
+        bytes=vector<lli>(
                 (istreambuf_iterator<char>(input)),
                 (istreambuf_iterator<char>()));
 
         input.close();
 
     }
-    CrFile(vector<char> in){
+    CrFile(vector<lli> in){
         bytes=std::move(in);
     }
     void show(){
@@ -29,11 +29,11 @@ public:
             cout<<i;
         }
     }
-    vector<char>getVector(){
+    vector<lli>getVector(){
         return bytes;
     }
     int outToFile(string name="foo"){
-        ofstream outputFile(name);
+        ofstream outputFile(name,ios::binary | ios::out);
         ostream_iterator<char>outputIter(outputFile,"");
         copy(bytes.begin(),bytes.end(),outputIter);
     }
@@ -46,7 +46,13 @@ lli genPrime(lli min=4,lli max=100){
     }
     return temp;
 }
-
+vector<lli> shamCypher(vector<lli>file,lli pow,lli p){
+    vector<lli> temp=file;
+    for(auto &i:temp){
+        i=modPow(i,pow,p);
+    }
+    return temp;
+}
 int main(){
     lli Ca=0,Da=0,p;
     lli Cb=0,Db=0;
@@ -65,10 +71,30 @@ int main(){
     cout<<"\n"<<Ca<<"\n"<<Da<<"\n"<<(Ca*Da)%(p-1);
     cout<<"\n"<<Cb<<"\n"<<Db<<"\n"<<(Cb*Db)%(p-1);
     CrFile srcFile("test.jpg");
-
-//    for(auto &i:srcFile.getVector()){
+vector<lli> temp= shamCypher(srcFile.getVector(),Ca,p);
+//    for(auto &i:temp){
 //        i= modPow(i,Ca,p);
 //    }
     srcFile.outToFile("test1.jpg");
+    CrFile srcFile1(temp);
+    srcFile1.outToFile("test2.jpg");
+    temp= shamCypher(srcFile1.getVector(),Cb,p);
+//    for(auto &i:temp){
+//        i= modPow(i,Cb,p);
+//    }
+    CrFile srcFile2(temp);
+    srcFile2.outToFile("test3.jpg");
+    temp= shamCypher(srcFile2.getVector(),Da,p);
+//    for(auto &i:temp){
+//        i= modPow(i,Da,p);
+//    }
+    CrFile srcFile3(temp);
+    srcFile3.outToFile("test4.jpg");
+    temp= shamCypher(srcFile3.getVector(),Db,p);
+//    for(auto &i:temp){
+//        i= modPow(i,Db,p);
+//    }
+    CrFile srcFile4(temp);
+    srcFile4.outToFile("test5.jpg");
     return 0;
 }
