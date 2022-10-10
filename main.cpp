@@ -1,9 +1,12 @@
 #include <iostream>
 #include <fstream>
+#include <utility>
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include "crypt.h"
 using namespace std;
+
 class CrFile{
 private:
     vector<char> bytes;
@@ -19,7 +22,7 @@ public:
 
     }
     CrFile(vector<char> in){
-        bytes=in;
+        bytes=std::move(in);
     }
     void show(){
         for(auto &i:bytes){
@@ -36,24 +39,36 @@ public:
     }
 
 };
+lli genPrime(lli min=4,lli max=100){
+    lli temp=4;
+    while(!checkSimple(temp)){
+        temp= random(min,max);
+    }
+    return temp;
+}
 
 int main(){
-    CrFile temp("test.png");
-    vector<char> t=temp.getVector();
-    for(auto &i:t){
-        i+=2;
+    lli Ca=0,Da=0,p;
+    lli Cb=0,Db=0;
+    lli min=pow(10,7);
+    lli max=pow(10,10);
+    p=genPrime(min,max);
+    cout<<p;
+    while((Ca*Da)%(p-1)!=1){
+        Ca= random(min,max);
+        Da=random(min,max);
     }
-
-    CrFile out(t);
-
-    out.outToFile("test1.png");
-    vector<char> t1=out.getVector();
-    for(auto &i: t1){
-        i-=2;
+    while((Cb*Db)%(p-1)!=1){
+        Cb= random(min,max);
+        Db=random(min,max);
     }
+    cout<<"\n"<<Ca<<"\n"<<Da<<"\n"<<(Ca*Da)%(p-1);
+    cout<<"\n"<<Cb<<"\n"<<Db<<"\n"<<(Cb*Db)%(p-1);
+    CrFile srcFile("test.jpg");
 
-    CrFile outq(t1);
-
-    outq.outToFile("test2.png");
+//    for(auto &i:srcFile.getVector()){
+//        i= modPow(i,Ca,p);
+//    }
+    srcFile.outToFile("test1.jpg");
     return 0;
 }
