@@ -42,7 +42,7 @@ void nlPrint(const vector<lli> &data) {
  * @return pow(a,x)%p =y(long long int)
  *
  */
-int modPow(lli iBase, lli iPow, lli iMod) {
+lli modPow(lli iBase, lli iPow, lli iMod) {
     if (iMod == 0) {
         return 0;
     }
