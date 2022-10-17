@@ -171,6 +171,7 @@ lli diffHelm(int iSeed = NULL) {
 
 }
 lli random(lli min, lli max) {
+
     return rand() % (max - min) + min;
 }
 /**

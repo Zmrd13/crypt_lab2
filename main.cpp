@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include <bitset>
 #include "crypt.h"
 
 using namespace std;
@@ -66,6 +67,7 @@ vector<lli> shamCypher(vector<lli> file, lli pow, lli p) {
 string fileNameSplit(string fN, int part = 0) {
     string temp = "";
     int check = 0;
+
     for (auto &i: fN) {
         switch (part) {
             case 0:
@@ -109,7 +111,7 @@ int shamRun(const string &fileName = "foo.txt") {
     cout << endl;
     CrFile tempFile;
     tempFile = CrFile(fileName);
-    tempFile.outToFile(name + to_string(iter) + ext);
+   // tempFile.outToFile(name + to_string(iter) + ext);
     iter++;
     tempFile = CrFile(shamCypher(tempFile.getVector(), Ca, p));
     tempFile.outToFile(name + to_string(iter) + ext);
@@ -122,8 +124,15 @@ int shamRun(const string &fileName = "foo.txt") {
     iter++;
     tempFile = CrFile(shamCypher(tempFile.getVector(), Db, p));
     tempFile.outToFile(name + to_string(iter) + ext);
+    if(CrFile(name+ext).getVector()!=CrFile(name+ to_string(iter) + ext).getVector()){
+        nlPrint("WRONG CRYPT");
+        return -1;
+    }
+    else{
+        nlPrint("RIGHT "+name+ to_string(iter) + ext);
+        return 0;
+    }
 
-    return 0;
 }
 //lli ElGamalCalc(lli target,lli g,lli k,lli p,lli x,lli y){
 //    cout << " Orig =" << target << endl;
@@ -149,6 +158,7 @@ CrFile ElGamalEncrypt(CrFile target,lli k,lli p,lli y){
     }
     return {b};
 }
+
 lli ElGamalRun(int iSeed = NULL,const string& fileName="foo.txt") {
     string name, ext;
     int iter=0;
@@ -191,7 +201,8 @@ lli ElGamalRun(int iSeed = NULL,const string& fileName="foo.txt") {
     CrFile enc= ElGamalEncrypt(orig,iAliceSecKey,iP,iBobPubKey);
     enc.outToFile(name + to_string(iter) + ext);
     CrFile dec=ElGamalDecrypt(enc,iP,a,iBobSecKey);
-    dec.outToFile(name + to_string(iter+1) + ext);
+    iter++;
+    dec.outToFile(name + to_string(iter) + ext);
     lli b = (t * modPow(iBobPubKey, iAliceSecKey, iP)) % iP;
 //    cout<<b<<endl;
 //    nlPrint("");
@@ -199,16 +210,149 @@ lli ElGamalRun(int iSeed = NULL,const string& fileName="foo.txt") {
 //    nlPrint(enc.getVector());
 //    nlPrint(dec.getVector());
 //    nlPrint("");
-    cout << (b * modPow(a, iP - 1 - iBobSecKey, iP)) % iP;
+    if(CrFile(name+ext).getVector()!=CrFile(name+ to_string(iter) + ext).getVector()){
+        nlPrint("WRONG CRYPT");
+        return -1;
+    }
+    else{
+        nlPrint("RIGHT "+name+ to_string(iter) + ext);
+        return 0;
+    }
+   // cout << (b * modPow(a, iP - 1 - iBobSecKey, iP)) % iP;
+}
+vector<lli> VernamEncDec(vector<lli>key,vector<lli>file){
+    vector<lli>gen;
+    for(int i=0;i<file.size();i++){
+        bitset<sizeof(lli)> fileBit(file.at(i));
+        bitset<sizeof(lli)> keyBit(key.at(i));
+        gen.push_back((lli)((fileBit^keyBit).to_ullong()));
+      // cout<<gen.at(i)<<' ';
+       // cout<<file.at(i)<<' ';
+    }
+    return {gen};
+}
+
+int VernamRun(string const& fileName){
+    srand(time(NULL));
+   //lli orig =255;
+    string name, ext;
+    int iter=0;
+    name = fileNameSplit(fileName, 0);
+    ext = fileNameSplit(fileName, 1);
+   CrFile origFile(name+ext);
+   vector<lli> key(origFile.getVector().size());
+   for(auto &i :key){
+    i=rand()%255;
+   };
+    CrFile encFile=(VernamEncDec(key,origFile.getVector()));
+    encFile.outToFile(name+ to_string(iter) + ext);
+    iter++;
+    CrFile decFile=(VernamEncDec(key,encFile.getVector()));
+    decFile.outToFile(name+ to_string(iter) + ext);
+   //lli key=rand();
+    if(CrFile(name+ext).getVector()!=CrFile(name+ to_string(iter) + ext).getVector()){
+        nlPrint("WRONG CRYPT");
+        return -1;
+    }
+    else{
+        nlPrint("RIGHT "+name+ to_string(iter) + ext);
+        return 0;
+    }
+
+}
+lli invEv(lli a,lli b){
+    if((a%b*(extGCD(b,a).at(2)+b))%b){
+
+        return (extGCD(b,a).at(2)+b);
+    }
+    return 0;
+}
+vector <lli> RSA(vector <lli>base,lli pow , lli mod){
+    vector<lli> temp;
+    for(auto &i:base){
+    temp.push_back(modPow(i,pow,mod));
+    }
+    return temp;
+}
+int RsaRun(string const& fileName){
+    lli p,q,n,phi;
+    string name, ext;
+    int iter=0;
+    name = fileNameSplit(fileName, 0);
+    ext = fileNameSplit(fileName, 1);
+    q= genPrime(4,(lli)pow(10,4));
+    p= genPrime(4,(lli)pow(10,5));
+    n=p*q;
+    phi=(p-1)*(q-1);
+    lli c,d=phi+1;
+    lli check=0;
+    while(d>phi||check==0){
+        d= random(4,phi);
+
+        if(extGCD(phi,d).at(0)==1){
+            check=1;
+        }
+        else{
+            check=0;
+
+        }
+
+
+    }
+   // nlPrint("check");
+  //  nlPrint(check);
+    //nlPrint( d);
+
+   // nlPrint( extGCD(phi,d));
+  c= invEv(d,phi);
+   // nlPrint(c);
+
+  //  nlPrint(phi);
+   // nlPrint("c");
+  //  nlPrint(c);
+   // nlPrint("==1==");
+  //  nlPrint((c%phi*d%phi)%phi);
+  //  nlPrint("orig");
+    CrFile temp(name+ext);
+  //  nlPrint(temp.getVector());
+    temp=CrFile(RSA(temp.getVector(),d,n));
+  //  nlPrint("enc");
+   // nlPrint(temp.getVector());
+    temp.outToFile(name+ to_string(iter) + ext);
+    temp=CrFile(RSA(temp.getVector(),c,n));
+//    nlPrint("dec");
+//    nlPrint(temp.getVector());
+    iter++;
+    temp.outToFile(name+ to_string(iter) + ext);
+   //nlPrint(d);
+   // nlPrint(phi);
+    //nlPrint( extGCD(phi,d));
+    if(CrFile(name+ext).getVector()!=CrFile(name+ to_string(iter) + ext).getVector()){
+        nlPrint("WRONG CRYPT");
+        return -1;
+    }
+    else{
+        nlPrint("RIGHT "+name+ to_string(iter) + ext);
+        return 0;
+    }
+
 }
 
 int main() {
+    srand(time(NULL));
 //  cout<<fileNameSplit("foo.bar",0)<<endl;
 //    cout<<fileNameSplit("foo.bar",1)<<endl;
 //    cout<<fileNameSplit("foo.bar",2)<<endl;
-    // shamRun("test.jpg");
-    nlPrint("");
-    ElGamalRun(NULL,"test.jpg");
+    //
+   // nlPrint("");
+
+  shamRun("srcFiles/testShamir.jpg");
+  ElGamalRun(NULL,"srcFiles/testGamal.jpg");
+  VernamRun("srcFiles/testVer.jpg");
+
+//    (a%b*(extGCD(b,a).at(2)+b))%b
+
+    RsaRun("srcFiles/testRSA.jpg");
 //     CrFile srcFile("test.jpg");
 // vector<lli> temp= shamCypher(srcFile.getVector(),Ca,p);
 // //    for(auto &i:temp){
