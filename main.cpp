@@ -13,14 +13,23 @@ class CrFile {
 private:
     vector<lli> bytes;
 public:
-    CrFile(string name = "foo", string path = "") {
+    CrFile(string name = "foo", string path = "",bool enc=0) {
         ifstream input(name, std::ios::binary);
 
         char temp;
+        string tempStr;
         input >> std::noskipws;
-        while (input>>temp)  // You can have a different delimiter
+        if(!enc){
+        while (input>>temp)
         {
          bytes.push_back(temp);
+        }}
+        else{
+            while (getline(input,tempStr,','))
+            {
+            //    cout<<tempStr;
+                bytes.push_back(atoll(tempStr.c_str()));
+            }
         }
 
     }
@@ -206,7 +215,7 @@ lli ElGamalRun(int iSeed = NULL,const string& fileName="foo.txt") {
     CrFile orig(fileName);
     CrFile enc= ElGamalEncrypt(orig,iAliceSecKey,iP,iBobPubKey);
     enc.outToFile(name + to_string(iter) + ext);
-    CrFile dec=ElGamalDecrypt(enc,iP,a,iBobSecKey);
+    CrFile dec=ElGamalDecrypt(CrFile(name + to_string(iter) + ext,"",1),iP,a,iBobSecKey);
     iter++;
     dec.decToFile(name + to_string(iter) + ext);
     lli b = (t * modPow(iBobPubKey, iAliceSecKey, iP)) % iP;
@@ -325,7 +334,7 @@ int RsaRun(string const& fileName){
   //  nlPrint("enc");
    // nlPrint(temp.getVector());
     temp.outToFile(name+ to_string(iter) + ext);
-    temp=CrFile(RSA(temp.getVector(),c,n));
+    temp=CrFile(RSA(CrFile(name+ to_string(iter) + ext,"",1).getVector(),c,n));
 //    nlPrint("dec");
 //    nlPrint(temp.getVector());
     iter++;
