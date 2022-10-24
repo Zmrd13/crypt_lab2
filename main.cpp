@@ -16,11 +16,12 @@ public:
     CrFile(string name = "foo", string path = "") {
         ifstream input(name, std::ios::binary);
 
-        bytes = vector<lli>(
-                (istreambuf_iterator<char>(input)),
-                (istreambuf_iterator<char>()));
-
-        input.close();
+        char temp;
+        input >> std::noskipws;
+        while (input>>temp)  // You can have a different delimiter
+        {
+         bytes.push_back(temp);
+        }
 
     }
 
@@ -40,7 +41,12 @@ public:
 
     int outToFile(string name = "foo") {
         ofstream outputFile(name, ios::binary | ios::out);
-        ostream_iterator<char> outputIter(outputFile, "");
+        ostream_iterator<lli> outputIter(outputFile,",");
+        copy(bytes.begin(), bytes.end(), outputIter);
+    }
+    int decToFile(string name = "foo") {
+        ofstream outputFile(name, ios::binary | ios::out);
+        ostream_iterator<char> outputIter(outputFile,"");
         copy(bytes.begin(), bytes.end(), outputIter);
     }
 
@@ -123,7 +129,7 @@ int shamRun(const string &fileName = "foo.txt") {
     tempFile.outToFile(name + to_string(iter) + ext);
     iter++;
     tempFile = CrFile(shamCypher(tempFile.getVector(), Db, p));
-    tempFile.outToFile(name + to_string(iter) + ext);
+    tempFile.decToFile(name + to_string(iter) + ext);
     if(CrFile(name+ext).getVector()!=CrFile(name+ to_string(iter) + ext).getVector()){
         nlPrint("WRONG CRYPT");
         return -1;
@@ -174,7 +180,7 @@ lli ElGamalRun(int iSeed = NULL,const string& fileName="foo.txt") {
     lli iP = 0;
     lli iG = 0;
     do {
-        iQ = rand() % ((lli) pow(10, 9) - 1) + 1;
+        iQ = rand() % ((lli) pow(10, 9) - 1) +(lli) pow(10, 6);
         iP = 2 * iQ + 1;
     } while (!(checkSimple(iQ) && checkSimple(iP)));
     do {
@@ -202,7 +208,7 @@ lli ElGamalRun(int iSeed = NULL,const string& fileName="foo.txt") {
     enc.outToFile(name + to_string(iter) + ext);
     CrFile dec=ElGamalDecrypt(enc,iP,a,iBobSecKey);
     iter++;
-    dec.outToFile(name + to_string(iter) + ext);
+    dec.decToFile(name + to_string(iter) + ext);
     lli b = (t * modPow(iBobPubKey, iAliceSecKey, iP)) % iP;
 //    cout<<b<<endl;
 //    nlPrint("");
@@ -248,7 +254,7 @@ int VernamRun(string const& fileName){
     encFile.outToFile(name+ to_string(iter) + ext);
     iter++;
     CrFile decFile=(VernamEncDec(key,encFile.getVector()));
-    decFile.outToFile(name+ to_string(iter) + ext);
+    decFile.decToFile(name+ to_string(iter) + ext);
    //lli key=rand();
     if(CrFile(name+ext).getVector()!=CrFile(name+ to_string(iter) + ext).getVector()){
         nlPrint("WRONG CRYPT");
@@ -323,7 +329,7 @@ int RsaRun(string const& fileName){
 //    nlPrint("dec");
 //    nlPrint(temp.getVector());
     iter++;
-    temp.outToFile(name+ to_string(iter) + ext);
+    temp.decToFile(name+ to_string(iter) + ext);
    //nlPrint(d);
    // nlPrint(phi);
     //nlPrint( extGCD(phi,d));
@@ -346,13 +352,13 @@ int main() {
     //
    // nlPrint("");
 
-  shamRun("srcFiles/testShamir.jpg");
-  ElGamalRun(NULL,"srcFiles/testGamal.jpg");
-  VernamRun("srcFiles/testVer.jpg");
-
-//    (a%b*(extGCD(b,a).at(2)+b))%b
-
-    RsaRun("srcFiles/testRSA.jpg");
+  shamRun("srcFiles//testShamir.jpg");
+ ElGamalRun(NULL,"srcFiles/testGamal.jpg");
+ VernamRun("srcFiles/testVer.jpg");
+//
+////    (a%b*(extGCD(b,a).at(2)+b))%b
+//
+   RsaRun("srcFiles/testRSA.jpg");
 //     CrFile srcFile("test.jpg");
 // vector<lli> temp= shamCypher(srcFile.getVector(),Ca,p);
 // //    for(auto &i:temp){
